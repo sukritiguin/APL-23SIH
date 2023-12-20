@@ -1,0 +1,142 @@
+<!-- yourapp/templates/yourapp/index.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Django App</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/output.css' %}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-900 to-slate-900 grid h-screen">
+
+<!-- your_template.html -->
+
+  
+    
+    <h1 class="text-yellow-500 text-5xl m-6">Dashboard
+    <hr class="border-t-4 border-gray-200 m-5"></h1>
+
+
+
+    <div class="flex flex-wrap justify-around">
+        <!-- KPI Card 1 -->
+        <div class="w-1/5 p-4 bg-blue-200 rounded-md shadow-md m-1">
+          <div class="text-3xl font-bold text-blue-800 text-center">100</div>
+          <div class="text-lg text-blue-600 text-center">Total Sales</div>
+          <div class="flex justify-center mt-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="green" class="h-6 w-6 mr-2">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+            </svg>
+            <span class="text-green-600 text-center">+15%</span>
+          </div>
+        </div>
+      
+        <!-- KPI Card 2 -->
+        <div class="w-1/5 p-4 bg-green-200 rounded-md shadow-md m-1">
+          <div class="text-3xl font-bold text-green-800 text-center">75%</div>
+          <div class="text-lg text-green-600 text-center">Conversion Rate</div>
+          <div class="flex justify-center mt-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="red" class="h-6 w-6 mr-2">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+            <span class="text-red-600 text-center">-5%</span>
+          </div>
+        </div>
+      
+        <!-- KPI Card 3 -->
+        <div class="w-1/5 p-4 bg-yellow-200 rounded-md shadow-md m-1">
+          <div class="text-3xl font-bold text-yellow-800 text-center">$5,000</div>
+          <div class="text-lg text-yellow-600 text-center">Revenue</div>
+          <div class="flex justify-center mt-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="green" class="h-6 w-6 mr-2">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+            </svg>
+            <span class="text-green-600">+10%</span>
+          </div>
+        </div>
+      
+        <!-- KPI Card 4 -->
+        <div class="w-1/5 p-4 bg-purple-200 rounded-md shadow-md m-1">
+          <div class="text-3xl font-bold text-purple-800 text-center">50</div>
+          <div class="text-lg text-purple-600 text-center">New Customers</div>
+          <div class="flex justify-center mt-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="green" class="h-6 w-6 mr-2">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+            </svg>
+            <span class="text-green-600 text-center">+20%</span>
+          </div>
+        </div>
+      </div>
+      
+
+    <!-- Day by Total Power Consumed Graph -->
+
+    <div class="flex flex-wrap text-slate-500 justify-around m-10 p-4 bg-green-300 rounded-lg">
+
+        <p class="font-bold">Date by Power Consumed Graph</p>
+        <div>
+            <form id="filter-form">
+                <label for="start_date" class="font-bold">Start Date:</label>
+                <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="text-slate-500 rounded-md text-center" required>
+                <label for="end_date" class="font-bold pl-6 pr-2">End Date:</label>
+                <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="text-slate-500 rounded-md text-center" required>
+
+                <button type="submit" class="font-bold px-3">Filter</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="font-bold" id="plotly-graph">
+        {{ plot_div|safe }}
+    </div>
+
+
+
+
+
+    <!-- <div class="m-12">
+        {{ plot_div|safe }}
+    </div> -->
+
+     <div class="flex">
+        <h1 class="text-yellow-500 text-5xl ml-4 mt-21">Fault</h1>
+        <!-- <div class="bg-white w-64 h-32 m-10 rounded-xl">
+            <p>Testbox</p>
+        </div> -->
+    </div>
+    
+   <h1 class="text-yellow-500 text-5xl m-6">Volatge
+    <!-- <div class="bg-white w-64 h-32 p-2 m-10 rounded-xl">
+    </div> -->
+    <h1 class="text-yellow-500 text-5xl m-6">Current
+    <!-- <div class="bg-white w-64 h-32 p-2 m-10 rounded-xl">
+    </div> -->
+    <h1 class="text-yellow-500 text-5xl m-6">Power Consumption
+    <!-- <div class="bg-white w-64 h-32 p-2 m-10 rounded-xl">
+    </div> -->
+
+    <script>
+        // JavaScript code for dynamic form submission
+        document.getElementById('filter-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            updatePlotlyGraph();
+        });
+
+        function updatePlotlyGraph() {
+            var startDate = document.getElementById('start_date').value;
+            var endDate = document.getElementById('end_date').value;
+
+            // You can use AJAX to send the form data to the server and get the updated plot_div
+            // For simplicity, I'll reload the page with the new URL parameters
+
+            var newUrl = window.location.pathname + '?start_date=' + startDate + '&end_date=' + endDate;
+            window.location.href = newUrl;
+        }
+
+
+    </script>
+
+    <script src="{% static 'templates/js/script.js' %}"></script>
+</body>
+</html>

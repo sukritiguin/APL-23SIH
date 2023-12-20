@@ -1,0 +1,15 @@
+<!-- yourapp/templates/yourapp/index.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Django App</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/output.css' %}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-900 to-slate-900">
+    <div class="flex flex-wrap justify-around my-6">
+        <h1 class="text-5xl text-slate-300">Automated Public Lighting</h1>
+    </div>
+</body>

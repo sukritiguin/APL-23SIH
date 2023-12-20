@@ -1,0 +1,39 @@
+<!-- yourapp/templates/yourapp/voltage_graph.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Django App</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/output.css' %}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-900 to-slate-900 grid h-screen">
+    <div id="voltage-plot">
+        {{ volt_plot_div|safe }}
+    </div>
+
+
+
+    <script>
+        $(document).ready(function() {
+            // Update the plot every second
+            setInterval(updatePlot, 4000);
+            console.log("Current Time: ");
+            function updatePlot() {
+                // Fetch new data from the server
+                $.ajax({
+                    url: '{% url "plot_voltage" %}',
+                    method: 'GET',
+                    success: function(response) {
+                        // Update the plot with new data
+                        $('#voltage-plot').html(response);
+                    },
+                    error: function(error) {
+                        console.error('Error fetching data:', error);
+                    }
+                });
+            }
+        });
+    </script>
+</body>

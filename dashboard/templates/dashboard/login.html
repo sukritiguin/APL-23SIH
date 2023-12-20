@@ -1,0 +1,40 @@
+<!-- yourapp/templates/yourapp/index.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Django App</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/output.css' %}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-900 to-slate-900"></body>
+
+    
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li class="text-center text-red-600">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="flex flex-wrap justify-center items-center h-screen">
+        <form method="post" action="{% url 'login' %}" class="border-2 rounded-xl p-4 text-xl text-white">
+            {% csrf_token %}
+            <h1 class="text-5xl text-center">Login</h1>
+            <hr>
+
+            <label for="username" class="m-4">Username:</label>
+            <input type="text" name="username" class="m-4 text-slate-500" required><br>
+    
+            <label for="password" class="m-4">Password:</label>
+            <input type="password" name="password" class="m-4 text-slate-500" required><br>
+    
+            <button type="submit" class="place-self-stretch p-2 rounded-lg m-2 bg-green-400">Login</button>
+        </form>
+    </div>
+    
+
+</body>
+</html>
