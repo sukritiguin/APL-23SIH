@@ -1,0 +1,68 @@
+<!-- yourapp/templates/yourapp/index.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Automated Smart Lighting</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/output.css' %}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+
+
+<body class="bg-gradient-to-r from-blue-900 to-slate-900">
+    {% include 'dashboard/navbar.html' %}
+
+    <header class="text-white text-center py-8">
+        <h1 class="text-4xl font-bold">Automated Smart Lighting</h1>
+        <p class="mt-2">Revolutionizing Your Lighting Experience</p>
+    </header>
+
+    <section>
+        <div class="flex flex-wrap justify-around p-4 text-white border-2 m-4 rounded-xl">
+            <h1 class="text-4xl m-2">💡 Our Story</h1>
+            <div class="flex">
+                <p class="px-4 text-lg">
+                    Our story is one of innovation and efficiency. Unlike conventional methods
+                    that entail individual microcontroller boards for each lamp post, relying on
+                    intricate technologies like GPS, LoRa, Zigbee, or Bluetooth, we dared to simplify.
+                    By embracing a forward-thinking approach that minimizes wires and centralizes control,
+                    we introduced a single Internet-enabled microcontroller, the Nodemcu, capable of managing
+                    a zone's entire network of street lights (15-20 lights).
+                    Our narrative is built on the principle of accessibility. We've not only
+                    slashed installation costs but also prioritized intelligence. With fault detection
+                    mechanisms and responsive illumination control based on motion detection, our solution
+                    integrates seamlessly with the fabric of urban life.
+                    This is more than a project; it's our story of making advanced street lighting solutions
+                    not just affordable but an integral part of the smart city vision."
+                </p>
+    </section>
+
+    <section>
+        <div class="flex flex-wrap justify-around p-4 text-white border-2 m-4 rounded-xl">
+            <h1 class="text-4xl m-2">🚀 Our Mission</h1>
+                    <div class="flex">
+                <p class="px-4 text-lg">
+                    Revolutionizing Street Lighting: Cutting Costs, Enhancing Efficiency
+                    Traditional IoT-based street light installations come with a hefty price tag,
+                    often costing cities millions. However, our innovative solution redefines
+                    this paradigm, delivering the same benefits at nearly half the cost.
+                    Unlike conventional approaches that involve microcontroller boards for each
+                    lamp post and rely on technologies like GPS, LoRa, Zigbee, or Bluetooth,
+                    our approach minimizes complexity. By reducing the number of wires and
+                    centralizing control, we use a single Internet-enabled microcontroller,
+                    the Nodemcu, to manage multiple street lights (15-20 lights) in a zone. This not
+                    only significantly cuts installation costs but also ensures fault detection and
+                    intelligent illumination control based on motion detection. Our mission is to
+                    make advanced street lighting solutions accessible, cost-effective, and seamlessly
+                    integrated with modern urban infrastructure.
+                </p>
+    </section>
+    </main>
+
+    <footer class="bg-blue-500 text-white text-center py-4 mt-8">
+        <p>&copy; 2023 Automated Smart Lighting. All Rights Reserved.</p>
+    </footer>
+
+</html>

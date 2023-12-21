@@ -2,14 +2,89 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Your Django App</title>
+    <title>Django App⚡</title>
     <link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/output.css' %}">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
+
 <body class="bg-gradient-to-r from-blue-900 to-slate-900">
+    {% include 'dashboard/navbar.html' %}
     <div class="flex flex-wrap justify-around my-6">
-        <h1 class="text-5xl text-slate-300">Automated Public Lighting</h1>
+        <h1 class="text-5xl text-slate-300">Welcome to Automated Public Lighting</h1>
+    </div>
+    {% if messages %}
+    <ul id="messages-list">
+        {% for message in messages %}
+        <li class="text-center text-green-600 rounded-xl p-2 m-2" data-timeout="5000">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="flex flex-wrap justify-around p-4 text-white border-2 m-4 rounded-xl">
+        <h1 class="text-4xl m-2">Our Goal 🎯</h1>
+        <div class="flex">
+            <p class="pr-4 text-xl">Our project solution aims at achieving an automated public
+                lighting system through IOT with innovative circuitry that will not only reduce
+                energy costs and expenses but also have a feature for fault detection. Along
+                with a robust software system that stores, comprising of a database that will
+                store all data regarding power consumption, saving and history of usage and a
+                fluid and user-friendly Graphical User Interface for visualisation of such data,
+                which will enable operators to see how many units of power is saved and also
+                notify them about faulty lamps in the zone and help them identify the pin-point
+                location of any faulty lamps. <br>
+                <br>
+        </div>
+        <div class="flex">
+        <h1 class="text-4xl m-5">⚙Key Features</h1>
+        
+            <p class="pr-4 text-2xl">
+                Some of the Key Features are :~ <br>
+                1. Energy Efficiency: In the context of automated public lighting, energy efficiency refers to the 
+                system's ability to optimize the consumption of electrical energy for illuminating public spaces. 
+                This involves smart algorithms and technologies that dynamically adjust the intensity of street 
+                lights based on real-time conditions.<br>
+                2. Fault Detction: Fault detection in the context of public lighting systems involves the ability
+                 to identify and address issues or malfunctions promptly. This contributes to the overall 
+                 reliability and functionality of the lighting infrastructure<br>
+                3. Smart Control: Smart control systems adapt to changing urban needs by responding to environmental 
+                conditions, traffic patterns, and events. This adaptability enhances efficiency and aligns with
+                 the concept of creating a responsive and sustainable urban lighting environment..<br>
+            </p>
+        </div>
     </div>
 </body>
+
+<script>
+    // Wait for the DOM to be ready
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get the messages list
+        var messagesList = document.getElementById('messages-list');
+
+        // Check if the messages list exists
+        if (messagesList) {
+            // Get all messages within the list
+            var messages = messagesList.getElementsByTagName('li');
+
+            // Loop through each message
+            for (var i = 0; i < messages.length; i++) {
+                // Get the message timeout from the data-timeout attribute
+                var timeout = parseInt(messages[i].getAttribute('data-timeout'), 10);
+
+                // Set a timeout to hide the message
+                setTimeout(function (message) {
+                    message.style.display = 'none';
+                }, timeout, messages[i]);
+            }
+        }
+    });
+</script>
+<footer class="bg-gray-900 text-white text-center py-4">
+    <p>&copy; 2023 Automated Public Lighting. All Rights Reserved.</p>
+</footer>
+
+</body>
+
+</html>

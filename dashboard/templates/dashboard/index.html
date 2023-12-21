@@ -9,21 +9,23 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
 <body class="bg-gradient-to-r from-blue-900 to-slate-900 grid h-screen">
+  {% include 'dashboard/navbar.html' %}
 
 <!-- your_template.html -->
 
   
     
     <h1 class="text-yellow-500 text-5xl m-6">Dashboard
-    <hr class="border-t-4 border-gray-200 m-5"></h1>
+      <hr class="border-t-4 border-gray-200 m-5">
+    </h1>
 
 
 
     <div class="flex flex-wrap justify-around">
         <!-- KPI Card 1 -->
         <div class="w-1/5 p-4 bg-blue-200 rounded-md shadow-md m-1">
-          <div class="text-3xl font-bold text-blue-800 text-center">100</div>
-          <div class="text-lg text-blue-600 text-center">Total Sales</div>
+          <div class="text-3xl font-bold text-blue-800 text-center">Ampere (A)</div>
+          <div class="text-lg text-blue-600 text-center">Current</div>
           <div class="flex justify-center mt-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="green" class="h-6 w-6 mr-2">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
@@ -34,8 +36,8 @@
       
         <!-- KPI Card 2 -->
         <div class="w-1/5 p-4 bg-green-200 rounded-md shadow-md m-1">
-          <div class="text-3xl font-bold text-green-800 text-center">75%</div>
-          <div class="text-lg text-green-600 text-center">Conversion Rate</div>
+          <div class="text-3xl font-bold text-green-800 text-center">Volt (V)</div>
+          <div class="text-lg text-green-600 text-center">Voltage</div>
           <div class="flex justify-center mt-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="red" class="h-6 w-6 mr-2">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
@@ -46,8 +48,8 @@
       
         <!-- KPI Card 3 -->
         <div class="w-1/5 p-4 bg-yellow-200 rounded-md shadow-md m-1">
-          <div class="text-3xl font-bold text-yellow-800 text-center">$5,000</div>
-          <div class="text-lg text-yellow-600 text-center">Revenue</div>
+          <div class="text-3xl font-bold text-yellow-800 text-center">Watt (W) or kilowatt (kW)</div>
+          <div class="text-lg text-yellow-600 text-center">Power Consumption</div>
           <div class="flex justify-center mt-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="green" class="h-6 w-6 mr-2">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
@@ -92,28 +94,34 @@
     </div>
 
 
+    <div class="flex flex-wrap justify-around">
+      <div class="w-1/8 bg-green-400 p-4 rounded-lg mt-8 m-4">
+        <form id="email-form" method="post" action="{% url 'send_report_email' %}">
+            {% csrf_token %}
+            <label for="email" class="font-bold">Enter your mail:</label>
+            <input type="email" id="email" name="email" class="text-slate-500 rounded-md" required>
+            <br>
+            <div class="flex flex-wrap justify-around m-2">
+              <button type="submit" class="font-bold p-2 bg-slate-500 border-red-400 rounded-full">Send Report</button>
+            </div>
+        </form>
+      </div>
+    </div>
+
+    {% if messages %}
+      <ul class="messages">
+          {% for message in messages %}
+              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+          {% endfor %}
+      </ul>
+    {% endif %}
+
+
 
 
 
     <!-- <div class="m-12">
         {{ plot_div|safe }}
-    </div> -->
-
-     <div class="flex">
-        <h1 class="text-yellow-500 text-5xl ml-4 mt-21">Fault</h1>
-        <!-- <div class="bg-white w-64 h-32 m-10 rounded-xl">
-            <p>Testbox</p>
-        </div> -->
-    </div>
-    
-   <h1 class="text-yellow-500 text-5xl m-6">Volatge
-    <!-- <div class="bg-white w-64 h-32 p-2 m-10 rounded-xl">
-    </div> -->
-    <h1 class="text-yellow-500 text-5xl m-6">Current
-    <!-- <div class="bg-white w-64 h-32 p-2 m-10 rounded-xl">
-    </div> -->
-    <h1 class="text-yellow-500 text-5xl m-6">Power Consumption
-    <!-- <div class="bg-white w-64 h-32 p-2 m-10 rounded-xl">
     </div> -->
 
     <script>
@@ -133,6 +141,67 @@
             var newUrl = window.location.pathname + '?start_date=' + startDate + '&end_date=' + endDate;
             window.location.href = newUrl;
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+        // Create the button element
+        var button = document.createElement('a');
+        button.href = "{% url 'plot_voltage' %}";
+        button.textContent = 'Voltage Analysis';
+        button.className = 'text-slate-500 font-bold bg-green-300 p-2 rounded-xl';
+
+        // Get the container to inject the button
+        var container = document.querySelector('.space-x-4');
+
+        // Check if the container exists
+        if (container) {
+            // Inject the button into the container
+            container.appendChild(button);
+        }
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Create the button element
+        var button = document.createElement('a');
+        button.href = "{% url 'plot_current' %}";
+        button.textContent = 'Current Analysis';
+        button.className = 'text-slate-500 font-bold bg-green-300 p-2 rounded-xl';
+
+        // Get the container to inject the button
+        var container = document.querySelector('.space-x-4');
+
+        // Check if the container exists
+        if (container) {
+            // Inject the button into the container
+            container.appendChild(button);
+        }
+    });
+
+
+    document.getElementById('email-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        sendEmailReport();
+    });
+
+    function sendEmailReport() {
+      var email = document.getElementById('email').value;
+
+      // Include CSRF token in the data
+      var csrf_token = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+
+      $.ajax({
+          type: 'POST',
+          url: '{% url "send_report_email" %}',
+          data: { email: email, csrfmiddlewaretoken: csrf_token },
+          success: function (data) {
+              alert(data.message);
+              // Optionally, you can update the page content or show a success message without reloading
+          },
+          error: function () {
+              alert('Error sending email.');
+          }
+      });
+    }
 
 
     </script>

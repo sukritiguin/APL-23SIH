@@ -9,6 +9,7 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
 <body class="bg-gradient-to-r from-blue-900 to-slate-900 grid h-screen">
+    {% include 'dashboard/navbar.html' %}
     <div id="voltage-plot">
         {{ volt_plot_div|safe }}
     </div>

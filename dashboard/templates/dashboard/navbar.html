@@ -1,0 +1,18 @@
+<div class="bg-blue-500 p-4" id="navbar-id">
+    <nav class="container mx-auto flex items-center justify-between">
+        <!-- Logo -->
+        <div class="text-white text-2xl font-semibold">THE ELECTRONAUTS</div>
+
+        <!-- Navigation Links -->
+        <div class="space-x-4">
+            <a href="{% url 'home' %}" class="text-white">Home</a>
+            <a href="{% url 'dashboard' %}" class="text-slate-500 font-bold bg-green-300 p-2 rounded-xl">Dashboard</a>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'login' %}" class="text-white">Login</a>
+            {% else %}
+            <a href="{% url 'logout' %}" class="text-white">Logout</a>
+            {% endif %}
+            <a href="{% url 'aboutus' %}" class="text-white">About Us</a>
+        </div>
+    </nav>
+</div>

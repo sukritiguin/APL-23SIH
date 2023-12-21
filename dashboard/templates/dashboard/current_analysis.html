@@ -1,0 +1,74 @@
+<!-- yourapp/templates/yourapp/current_graph.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Django App</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/output.css' %}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<div class="bg-blue-500 p-4" id="navbar-id">
+    <nav class="container mx-auto flex items-center justify-between">
+        <!-- Logo -->
+        <div class="text-white text-2xl font-semibold">THE ELECTRONAUTS</div>
+
+        <!-- Navigation Links -->
+        <div class="space-x-4">
+            <a href="{% url 'home' %}" class="text-white">Home</a>
+            <a href="{% url 'dashboard' %}" class="text-slate-500 font-bold bg-green-300 p-2 rounded-xl">Dashboard</a>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'login' %}" class="text-white">Login</a>
+            {% else %}
+            <a href="{% url 'logout' %}" class="text-white">Logout</a>
+            {% endif %}
+            <a href="{% url 'aboutus' %}" class="text-white">About Us</a>
+        </div>
+    </nav>
+</div>
+<body class="bg-gradient-to-r from-blue-900 to-slate-900 grid h-screen">
+    
+
+    <div id="current-plot">
+        {{ current_plot_div|safe }}
+    </div>
+
+
+
+    <script>
+        $(document).ready(function() {
+            // Update the plot every second
+            setInterval(updatePlot, 4000);
+            console.log("Current Time: ");
+            function updatePlot() {
+                // Fetch new data from the server
+                $.ajax({
+                    url: '{% url "plot_current" %}',
+                    method: 'GET',
+                    success: function(response) {
+                        // Update the plot with new data
+                        $('#current-plot').html(response);
+                    },
+                    error: function(error) {
+                        console.error('Error fetching data:', error);
+                    }
+                });
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Run the check every 1000 milliseconds (1 second)
+            setInterval(checkAndRemoveNavbar, 0.0001);
+        });
+
+        function checkAndRemoveNavbar() {
+            // Check if there are more than one navbar elements
+            var navbars = document.querySelectorAll('#navbar-id'); // replace with your actual class
+            if (navbars.length > 1) {
+                // Remove the second navbar
+                navbars[1].parentNode.removeChild(navbars[1]);
+            }
+        }
+
+    </script>
+</body>
