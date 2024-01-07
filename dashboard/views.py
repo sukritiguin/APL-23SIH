@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 
+import time
+
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
@@ -24,6 +26,208 @@ from email.mime.text import MIMEText
 
 import random
 import os
+import boto3
+import pandas as pd
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, TA_CENTER
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.pdfgen import canvas
+from io import BytesIO
+import os
+import glob
+
+
+
+
+def delete_files_in_folder(folder):
+    files = glob.glob(os.path.join(folder, '*'))
+    for file in files:
+        try:
+            os.remove(file)
+            print(f"Deleted: {file}")
+        except Exception as e:
+            print(f"Error deleting {file}: {e}")
+
+def generate_power_consumption_plot(df_specific_day, specific_day):
+    # Convert the 'Time' column to a string representation
+    df_specific_day = df_specific_day.copy()
+    df_specific_day['Time'] = df_specific_day['Time'].astype(str)
+
+    # Create a bar graph for the specific day
+    plt.figure(figsize=(12, 6))
+    plt.bar(df_specific_day['Time'], df_specific_day['Power Consumed'])
+    plt.title(f'Power Consumption on {specific_day}')
+    plt.xlabel('Time (hours)')
+    plt.ylabel('Power Consumed')
+    plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better visibility
+    plt.tight_layout()
+
+    # Save the plot as an image
+    # Specify the image folder
+    img_folder = os.path.join(os.path.dirname(__file__), 'img')
+
+    # Ensure the img folder exists, create it if not
+    os.makedirs(img_folder, exist_ok=True)
+
+    # Specify the plot filename with the correct path
+    temp = str(specific_day).replace(':', '_')
+    plot_filename = os.path.join(img_folder, f'plot_data{temp}.png')
+
+    plt.savefig(plot_filename, format='png', bbox_inches='tight')
+    plt.close()
+
+    # Convert the plot image to an inline image
+    img = Image(plot_filename, width=480, height=240)
+
+    # Return the inline image
+    return img
+
+# Set the seed for reproducibility
+# np.random.seed(42)
+
+def generateReport(df):
+    # Create a PDF file
+    pdf_filename = 'output.pdf'
+    doc = SimpleDocTemplate(pdf_filename, pagesize=letter)
+
+    # Get predefined styles from the sample style sheet
+    styles = getSampleStyleSheet()
+
+    # Define your custom styles for header and text
+    header_style = ParagraphStyle(
+        'Header1',
+        parent=styles['Heading1'],
+        fontSize=16,
+        alignment=TA_CENTER,
+        textColor=colors.blue
+    )
+
+    text_style = ParagraphStyle(
+        'BodyText',
+        parent=styles['BodyText'],
+        fontSize=12,
+        space_after=5
+    )
+
+    # Add header
+    header = Paragraph("Power Consumption Report", style=header_style)
+    desc = "Our project solution aims at achieving an automated public lighting system through IOT with innovative circuitry that will not only reduce energy costs and expenses but also have a feature for fault detection. Along with a robust software system that stores, comprising of a database that will store all data regarding power consumption, saving and history of usage and a fluid and user-friendly Graphical User Interface for visualisation of such data, which will enable operators to see how many units of power is saved and also notify them about faulty lamps in the zone and help them identify the pin-point location of any faulty lamps."
+    text = Paragraph(
+        desc,
+        style=text_style)
+
+    # Convert DataFrame to table
+    table_data = [df.columns] + df.values.tolist()
+
+    # Define the style for the table
+    style = [
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]
+
+    # Alternating row colors
+    for i in range(1, len(df), 2):
+        style.extend([
+            ('BACKGROUND', (0, i), (-1, i), colors.lightgreen),
+            ('BACKGROUND', (0, i + 1), (-1, i + 1), colors.lightblue),
+        ])
+    col_widths = [max([len(str(row[i])) for row in table_data]) * 12 for i in range(len(df.columns))]
+    tbl = Table(table_data, style=style, colWidths=col_widths * len(df.columns))
+
+    # Create story and add elements
+    story = [header, text, Spacer(1, 12), tbl]
+
+    # Add plots for each day to the PDF
+    for specific_day in pd.date_range(start='2023-01-01', periods=30, freq='D'):
+        df_specific_day = df[df['Day'] == specific_day]
+        plot = generate_power_consumption_plot(df_specific_day, str(specific_day))
+        story.append(plot)
+
+    # Build the PDF
+    doc.build(story)
+    delete_files_in_folder('img')
+
+
+def fetchDataFromAWSDynamoDB():
+    from datetime import datetime
+    # Replace these values with your own
+    aws_access_key_id = 'AKIAWHBWMPR3QJWWSFWS'
+    aws_secret_access_key = 'dSFhG50Rgqigd5/KWObts2czhwgkFygbw9BMbqyc'
+    region_name = 'ap-southeast-1'
+    table_name = 'SIH_FINAL_table'
+
+    # Create a DynamoDB resource
+    dynamodb = boto3.resource(
+        'dynamodb',
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        region_name=region_name
+    )
+
+    # Get a reference to the table
+    table = dynamodb.Table(table_name)
+
+    # Use the `scan` method to fetch all items in the table
+    response = table.scan()
+    return response
+
+
+def getCurrentDF():
+    response = fetchDataFromAWSDynamoDB()
+    datalist = response['Items']
+    df = pd.DataFrame(datalist)
+    # Remove the newline character from 'TimeStamp'
+    df['TimeStamp'] = df['TimeStamp'].str.strip()
+
+    # Convert the 'TimeStamp' column to timestamps
+    df['TimeStamp'] = pd.to_datetime(df['TimeStamp'], format="%a %b %d %H:%M:%S %Y", errors='coerce')
+    
+    df = df[['TS', 'TimeStamp', 'Current', 'Voltage']]
+    # Convert the 'Light' column to integers
+    # df['Light'] = df['Light'].astype(int)
+    df['Current'] = df['Current'].astype(float)
+    df['Voltage'] = df['Voltage'].astype(float)
+    # Calculate the power and create a new 'Power' column
+    df['Power'] = df['Current'] * df['Voltage']
+    return df
+
+def getPlotData():
+    response = fetchDataFromAWSDynamoDB()
+    datalist = response['Items']
+    df = pd.DataFrame(datalist)
+    # Remove the newline character from 'TimeStamp'
+    df['TimeStamp'] = df['TimeStamp'].str.strip()
+
+    # Convert the 'TimeStamp' column to timestamps
+    df['TimeStamp'] = pd.to_datetime(df['TimeStamp'], format="%a %b %d %H:%M:%S %Y", errors='coerce')
+    
+    df = df[['TS', 'TimeStamp', 'Current', 'Voltage']]
+    # Convert the 'Light' column to integers
+    # df['Light'] = df['Light'].astype(int)
+    df['Current'] = df['Current'].astype(float)
+    df['Voltage'] = df['Voltage'].astype(float)
+    # Calculate the power and create a new 'Power' column
+    df['Power'] = df['Current'] * df['Voltage']
+    print(df)
+    result_df = df.groupby(pd.Grouper(key='TimeStamp', freq='1S')).agg({'Power': 'sum'}).reset_index()
+
+    
+    return list(result_df['TimeStamp']), list(result_df['Power'])
+    
 
 @login_required
 def plotly_graph(request):
@@ -34,10 +238,12 @@ def plotly_graph(request):
 
 
     # Sample data
-    days = 10
-    start_date = datetime(2023, 1, 1)
-    date_list = [start_date + timedelta(days=x) for x in range(days)]
-    values = [10, 12, 8, 15, 11, 14, 9, 13, 16, 10]
+    # days = 10
+    # start_date = datetime(2023, 1, 1)
+    # date_list = [start_date + timedelta(days=x) for x in range(days)]
+    # values = [10, 12, 8, 15, 11, 14, 9, 13, 16, 10]
+
+    date_list, values = getPlotData()
 
     # Get user input from the form or use default values
     selected_start_date = request.GET.get('start_date', date_list[0].strftime('%Y-%m-%d'))
@@ -48,8 +254,10 @@ def plotly_graph(request):
     end_date_obj = datetime.strptime(selected_end_date, '%Y-%m-%d')
 
     # Filter data based on user input
-    filtered_dates = [date for date in date_list if start_date_obj <= date <= end_date_obj]
-    filtered_values = [values[i] for i, date in enumerate(date_list) if start_date_obj <= date <= end_date_obj]
+    # filtered_dates = [date for date in date_list if start_date_obj <= date <= end_date_obj]
+    # filtered_values = [values[i] for i, date in enumerate(date_list) if start_date_obj <= date <= end_date_obj]
+    filtered_dates = [date for date in date_list]
+    filtered_values = [values[i] for i, date in enumerate(date_list)]
 
     # Create a trace
     trace = go.Scatter(x=filtered_dates, y=filtered_values, mode='lines+markers', name='Filtered Values')
@@ -123,9 +331,38 @@ def plot_voltage(request):
     now = datetime.now()
 
     # Sample data for the last 30 seconds
+    df = getCurrentDF()
     time_interval = 30  # seconds
     time_points = [now - timedelta(seconds=i) for i in range(time_interval)][::-1]
+    time_points = list(df['TimeStamp'])
     voltage_values = [random.uniform(0, 5) for _ in range(time_interval)]
+    voltage_values = list(df['Voltage'])
+
+    # print(time_points)
+    # print(type(time_points))
+
+    # ind = 0
+    # t_points = []
+    # while ind < len(time_points):
+    #     t_points += time_points[ind]
+    #     ind += 4
+
+    # time_points = t_points[-30:]
+    time_points = time_points[-30:]
+
+    v_points = []
+    ind = 0
+    while ind < len(voltage_values):
+        v_points.append(voltage_values[ind])
+        ind += 4
+
+    voltage_values = v_points[-30:]
+
+
+    print(time_points)
+    print(voltage_values)
+
+
 
     # Create a trace
     trace = go.Scatter(x=time_points, y=voltage_values, mode='lines+markers', name='Voltage')
@@ -138,7 +375,7 @@ def plot_voltage(request):
                 yaxis=dict(
             title='Voltage',
             tickfont=dict(color='white'),
-            range=[0, 7]  # Set fixed range for y-axis
+            range=[0, 2]  # Set fixed range for y-axis
         ),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)'
@@ -167,6 +404,26 @@ def plot_current(request):
     time_points = [now - timedelta(seconds=i) for i in range(time_interval)][::-1]
     voltage_values = [random.uniform(0, 5) for _ in range(time_interval)]
 
+
+    df = getCurrentDF()
+    time_interval = 30  # seconds
+    time_points = [now - timedelta(seconds=i) for i in range(time_interval)][::-1]
+    time_points = list(df['TimeStamp'])
+    voltage_values = [random.uniform(0, 5) for _ in range(time_interval)]
+    voltage_values = list(df['Current'])
+
+    time_points = time_points[-30:]
+
+    v_points = []
+    ind = 0
+    while ind < len(voltage_values):
+        v_points.append(voltage_values[ind])
+        ind += 4
+
+    voltage_values = v_points[-30:]
+    print(time_points)
+    print(voltage_values)
+    
     # Create a trace
     trace = go.Scatter(x=time_points, y=voltage_values, mode='lines+markers', name='Voltage')
 
@@ -178,7 +435,7 @@ def plot_current(request):
                 yaxis=dict(
             title='Current',
             tickfont=dict(color='white'),
-            range=[0, 7]  # Set fixed range for y-axis
+            range=[0, 2]  # Set fixed range for y-axis
         ),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)'
@@ -348,7 +605,19 @@ def logout_view(request):
     return redirect('home')
 
 
-def send_mail(receiver_email, subject, body, filename=""):
+
+
+def createPDFReport(df):
+    fig, ax = plt.subplots(figsize=(12,4))
+    ax.axis('tight')
+    ax.axis('off')
+    the_table = ax.table(cellText=df.values,colLabels=df.columns,loc='center')
+
+    pp = PdfPages("table.pdf")
+    pp.savefig(fig, bbox_inches='tight')
+    pp.close()
+
+def send_mail(receiver_email, subject, body, filenames=None):
     sender_email = "2811guin@gmail.com"
     password = os.environ.get('GOOGLE_GMAIL_AUTH_PASS')
 
@@ -362,25 +631,30 @@ def send_mail(receiver_email, subject, body, filename=""):
     # Add body to email
     message.attach(MIMEText(body, "plain"))
 
-    if filename != "":
-        # Open PDF file in binary mode
-        with open(filename, "rb") as attachment:
-            # Add file as application/octet-stream
-            # Email client can usually download this automatically as attachment
-            part = MIMEBase("application", "octet-stream")
-            part.set_payload(attachment.read())
 
-        # Encode file in ASCII characters to send by email
-        encoders.encode_base64(part)
 
-        # Add header as key/value pair to attachment part
-        part.add_header(
-            "Content-Disposition",
-            f"attachment; filename= {filename}",
-        )
+    # Attach multiple files
+    if filenames:
+        for filename in filenames:
+            # Open the file in binary mode
+            with open(filename, "rb") as attachment:
+                # Add file as application/octet-stream
+                # Email client can usually download this automatically as an attachment
+                part = MIMEBase("application", "octet-stream")
+                part.set_payload(attachment.read())
 
-        # Add attachment to message and convert message to string
-        message.attach(part)
+            # Encode file in ASCII characters to send by email
+            encoders.encode_base64(part)
+
+            # Add header as key/value pair to attachment part
+            part.add_header(
+                "Content-Disposition",
+                f"attachment; filename= {os.path.basename(filename)}",
+            )
+
+            # Add attachment to message
+            message.attach(part)
+
     text = message.as_string()
 
     # Log in to server using secure context and send email
@@ -393,17 +667,38 @@ def send_mail(receiver_email, subject, body, filename=""):
 
 
 def send_report_email(request):
+    # Generate random data for 30 days
+    days = pd.date_range(start='2023-01-01', periods=30, freq='D')
+    times = pd.date_range(start='2023-01-01', periods=24, freq='H').time
+    power_consumed = np.random.uniform(low=10, high=100, size=(30, 24))
+
+    # Flatten the 2D array to create a single column for power consumed
+    power_consumed_flat = power_consumed.flatten()
+
+    # Create the DataFrame
+    data = {'Day': np.repeat(days, 24),
+            'Time': np.tile(times, 30),
+            'Power Consumed': power_consumed_flat}
+
+    df = pd.DataFrame(data)
+
+    generateReport(df)
+    df.to_csv("table.csv", index=False)
     if request.method == 'POST':
         email = request.POST.get('email', '')
 
         # Add your logic to generate the report or use an existing report
         # For example, you might want to use Django's render_to_string to render an HTML template as the email body.
 
+
+        
+        
         # Send the email
         send_mail(
             receiver_email=email,
-            subject="Trying to communicate",
-            body="Email sent successfully thought dashboard"
+            subject="Attachment is awesome",
+            body="Email sent successfully thought dashboard",
+            filenames=[r'output.pdf', r'table.csv']
         )
 
         # Add a success message

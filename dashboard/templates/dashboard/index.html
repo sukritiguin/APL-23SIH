@@ -194,7 +194,8 @@
           url: '{% url "send_report_email" %}',
           data: { email: email, csrfmiddlewaretoken: csrf_token },
           success: function (data) {
-              alert(data.message);
+              // alert(data.message);
+              alert('Email sent successfully')
               // Optionally, you can update the page content or show a success message without reloading
           },
           error: function () {

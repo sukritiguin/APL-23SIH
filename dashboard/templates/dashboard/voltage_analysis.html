@@ -19,7 +19,7 @@
     <script>
         $(document).ready(function() {
             // Update the plot every second
-            setInterval(updatePlot, 4000);
+            setInterval(updatePlot, 6000);
             console.log("Current Time: ");
             function updatePlot() {
                 // Fetch new data from the server
@@ -28,7 +28,27 @@
                     method: 'GET',
                     success: function(response) {
                         // Update the plot with new data
-                        $('#voltage-plot').html(response);
+                        // Update the plot with new data
+                        var responseType = typeof response;
+
+                        // Log the type to the console
+                        console.log('Response Type:', responseType);
+
+
+                        // Create a temporary container
+                        var tempContainer = $('<div>');
+
+                        // Set the response HTML as the content of the container
+                        tempContainer.html(response);
+
+                        // Find the div with id "current-plot" within the container
+                        var voltagePlotDiv = tempContainer.find('#voltage-plot');
+
+                        // Log the content of the found div
+                        console.log('Current Plot HTML:', voltagePlotDiv.html());
+
+                        // Replace the existing #current-plot with the new content
+                        $('#voltage-plot').replaceWith(voltagePlotDiv);
                     },
                     error: function(error) {
                         console.error('Error fetching data:', error);
