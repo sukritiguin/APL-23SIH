@@ -165,10 +165,10 @@ def generateReport(df):
 def fetchDataFromAWSDynamoDB():
     from datetime import datetime
     # Replace these values with your own
-    aws_access_key_id = 'AKIAWHBWMPR3QJWWSFWS'
-    aws_secret_access_key = 'dSFhG50Rgqigd5/KWObts2czhwgkFygbw9BMbqyc'
-    region_name = 'ap-southeast-1'
-    table_name = 'SIH_FINAL_table'
+    aws_access_key_id = 'dao-tomar-access-key-id-ta'
+    aws_secret_access_key = 'dao-tomar-secreat-key-id-ta'
+    region_name = 'region-tao-dao-tomar'
+    table_name = 'table-name-tao-dao-tomar'
 
     # Create a DynamoDB resource
     dynamodb = boto3.resource(
